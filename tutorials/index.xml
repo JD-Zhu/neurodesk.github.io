@@ -1,4 +1,249 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>NeuroDesk – Tutorials</title><link>https://neurodesk.github.io/tutorials/</link><description>Recent content in Tutorials on NeuroDesk</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://neurodesk.github.io/tutorials/index.xml" rel="self" type="application/rss+xml"/><item><title>Tutorials: FreeSurfer</title><link>https://neurodesk.github.io/tutorials/structural_imaging/freesurfer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/structural_imaging/freesurfer/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>NeuroDesk – Tutorials</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/</link><description>Recent content in Tutorials on NeuroDesk</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://JD-Zhu/neurodesk.github.io/tutorials/index.xml" rel="self" type="application/rss+xml"/><item><title>Tutorials: Reproducible script execution with DataLad</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/reproducibility/datalad-run/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/reproducibility/datalad-run/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;em>This tutorial was created by Sin Kim.&lt;/em>&lt;/p>
+&lt;p>Github: @AKSoo&lt;/p>
+&lt;p>Twitter: @SinKim98&lt;/p>
+&lt;/blockquote>
+&lt;p>In addition to being a convenient method of sharing data, DataLad can also help
+you create reproducible analyses by recording how certain result files were
+produced (i.e. &lt;em>provenance&lt;/em>). This helps others (and you!) easily keep track of
+analyses and rerun them.&lt;/p>
+&lt;p>This tutorial will assume you know the basics of navigating the terminal. If
+you are not familiar with the terminal at all, check the DataLad Handbook&amp;rsquo;s
+&lt;a href="http://handbook.datalad.org/en/latest/intro/howto.html">brief guide&lt;/a>.&lt;/p>
+&lt;h2 id="create-a-datalad-project">Create a DataLad project&lt;/h2>
+&lt;p>A DataLad &lt;em>dataset&lt;/em> can be any collection of files in folders, so it could be
+many things including an analysis project. Let&amp;rsquo;s go to the Neurodesktop storage
+and create a dataset for some project. Open a terminal and enter these commands:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ cd /neurodesktop-storage
+$ datalad create -c yoda SomeProject
+[INFO ] Creating a new annex repo at /home/user/Desktop/neurodesktop-storage/SomeProject
+[INFO ] Running procedure cfg_yoda
+[INFO ] == Command start (output follows) =====
+[INFO ] == Command exit (modification check follows) =====
+create(ok): /home/user/Desktop/neurodesktop-storage/SomeProject (dataset)
+&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">yoda?&lt;/h4>
+&lt;code>-c yoda&lt;/code> option configures the dataset according to
+the &lt;a href="http://handbook.datalad.org/en/latest/basics/101-127-yoda.html">YODA&lt;/a>, a
+set of intuitive organizational principles for data analyses that works
+especially well with version control.
+&lt;/div>
+&lt;p>Go in the dataset and check its contents.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ cd SomeProject
+$ ls
+CHANGELOG.md README.md code
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="create-a-script">Create a script&lt;/h2>
+&lt;p>One of DataLad&amp;rsquo;s strengths is that it assumes very little about your datasets.
+Thus, it can work with any other software on the terminal: Python, R, MATLAB,
+AFNI, FSL, FreeSurfer, etc. For this tutorial, we will run the simplest Julia
+script.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ ml julia
+$ cat &amp;gt; code/hello.jl &amp;lt;&amp;lt; EOF
+println(&amp;#34;hello neurodesktop&amp;#34;)
+EOF
+&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">EOF?&lt;/h4>
+For sake of demonstration, we create the script using
+built-in Bash terminal commands only (here document that starts after &lt;code>&amp;lt;&amp;lt; EOF&lt;/code>
+and ends when you enter &lt;code>EOF&lt;/code>), but you may use whatever text editor you are
+most comfortable with to create the &lt;code>code/hello.jl&lt;/code> file.
+&lt;/div>
+&lt;p>You may want to test (parts of) your script.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ julia code/hello.jl &amp;gt; hello.txt
+$ cat hello.txt
+hello neurodesktop
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="run-and-record">Run and record&lt;/h2>
+&lt;p>Before you run your analyses, you should check the dataset for changes and save
+or clean them.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ datalad status
+untracked: /home/user/Desktop/neurodesktop-storage/SomeProject/code/hello.jl (file)
+untracked: /home/user/Desktop/neurodesktop-storage/SomeProject/hello.txt (file)
+$ datalad save -m &amp;#39;hello script&amp;#39; code/
+add(ok): code/hello.jl (file)
+save(ok): . (dataset)
+action summary:
+add (ok: 1)
+save (ok: 1)
+$ git clean -i
+Would remove the following item:
+hello.txt
+*** Commands ***
+1: clean 2: filter by pattern 3: select by numbers 4: ask each 5: quit 6: help
+What now&amp;gt; 1
+Removing hello.txt
+&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">git&lt;/h4>
+&lt;code>git clean&lt;/code> is for removing new, untracked files. For
+resetting existing, modified files to the last saved version, you would need
+&lt;code>git reset --hard&lt;/code>.
+&lt;/div>
+&lt;p>When the dataset is clean, we are ready to &lt;code>datalad run&lt;/code>!&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ mkdir outputs
+$ datalad run -m &amp;#39;run hello&amp;#39; -o &amp;#39;outputs/hello.txt&amp;#39; &amp;#39;julia code/hello.jl &amp;gt; outputs/hello.txt&amp;#39;
+[INFO ] == Command start (output follows) =====
+[INFO ] == Command exit (modification check follows) =====
+add(ok): outputs/hello.txt (file)
+save(ok): . (dataset)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Let&amp;rsquo;s go over each of the arguments:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>-m 'run hello'&lt;/code>: Human-readable message to record in the dataset log.&lt;/li>
+&lt;li>&lt;code>-o 'outputs/hello.txt'&lt;/code>: Expected output of the script. You can specify
+multiple &lt;code>-o&lt;/code> arguments and/or use wildcards like &lt;code>'outputs/*'&lt;/code>. This script
+has no inputs, but you can similarly specify inputs with &lt;code>-i&lt;/code>.&lt;/li>
+&lt;li>&lt;code>'julia ... '&lt;/code>: The final argument is the command that DataLad will run.&lt;/li>
+&lt;/ul>
+&lt;p>Before getting to the exciting part, let&amp;rsquo;s do a quick sanity check.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ cat outputs/hello.txt
+hello neurodesktop
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="view-history-and-rerun">View history and rerun&lt;/h2>
+&lt;p>So what&amp;rsquo;s so good about the extra hassle of running scripts with &lt;code>datalad run&lt;/code>?
+To see that, you will need to pretend you are someone else (or you of future!)
+and install the dataset somewhere else. Note that &lt;code>-s&lt;/code> argument is probably a
+URL if you were really someone else.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ cd ~
+$ datalad install -s /neurodesktop-storage/SomeProject
+install(ok): /home/user/SomeProject (dataset)
+$ cd SomeProject
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Because a DataLad dataset is a Git repository, people who download your dataset
+can see exactly how &lt;code>outputs/hello.txt&lt;/code> was created using Git&amp;rsquo;s logs.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ git log outputs/hello.txt
+commit 52cff839596ff6e33aadf925d15ab26a607317de (HEAD -&amp;gt; master, origin/master, origin/HEAD)
+Author: Neurodesk User &amp;lt;user@neurodesk.github.io&amp;gt;
+Date: Thu Dec 9 08:31:15 2021 +0000
+[DATALAD RUNCMD] run hello
+=== Do not change lines below ===
+{
+&amp;#34;chain&amp;#34;: [],
+&amp;#34;cmd&amp;#34;: &amp;#34;julia code/hello.jl &amp;gt; outputs/hello.txt&amp;#34;,
+&amp;#34;dsid&amp;#34;: &amp;#34;1e82813d-856f-4118-b54d-c3823e025709&amp;#34;,
+&amp;#34;exit&amp;#34;: 0,
+&amp;#34;extra_inputs&amp;#34;: [],
+&amp;#34;inputs&amp;#34;: [],
+&amp;#34;outputs&amp;#34;: [
+&amp;#34;outputs/hello.txt&amp;#34;
+],
+&amp;#34;pwd&amp;#34;: &amp;#34;.&amp;#34;
+}
+^^^ Do not change lines above ^^^
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then, using that information, they can re-run the command that created the file
+using &lt;code>datalad rerun&lt;/code>!&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">$ datalad rerun 52cf
+[INFO ] run commit 52cff83; (run hello)
+run.remove(ok): outputs/hello.txt (file) [Removed file]
+[INFO ] == Command start (output follows) =====
+[INFO ] == Command exit (modification check follows) =====
+add(ok): outputs/hello.txt (file)
+action summary:
+add (ok: 1)
+run.remove (ok: 1)
+save (notneeded: 1)
+&lt;/code>&lt;/pre>&lt;/div>
+&lt;div class="alert alert-primary" role="alert">
+&lt;h4 class="alert-heading">git&lt;/h4>
+In Git, each commit (save state) is assigned a long,
+unique machine-generated ID. &lt;code>52cf&lt;/code> refers to the commit with ID that starts
+with those characters. Usually 4 is the minimum needed to uniquely identify a
+commit. Of course, this ID is probably different for you, so change this
+argument to match your commit.
+&lt;/div>
+&lt;h2 id="see-also">See Also&lt;/h2>
+&lt;ul>
+&lt;li>To learn more basics and advanced applications of DataLad, check out the
+&lt;a href="http://handbook.datalad.org/en/latest/">DataLad Handbook&lt;/a>.&lt;/li>
+&lt;li>DataLad is built on top of the popular version control tool &lt;strong>Git&lt;/strong>. There
+are many great resources on Git online, like this &lt;a href="https://git-scm.com/book/en/v2">free book&lt;/a>.&lt;/li>
+&lt;li>DataLad is only available on the terminal. For a detailed introduction on the
+Bash terminal, check the &lt;a href="https://mywiki.wooledge.org/BashGuide">BashGuide&lt;/a>.&lt;/li>
+&lt;li>For even more reproducibility, you can include &lt;em>containers&lt;/em> with your dataset
+to run analyses in. DataLad has an extension to support script execution in
+containers. See &lt;a href="http://handbook.datalad.org/en/latest/basics/101-133-containersrun.html">here&lt;/a>.&lt;/li>
+&lt;/ul></description></item><item><title>Tutorials: Analysing M/EEG Data with FieldTrip</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/electrophysiology/fieldtrip/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/electrophysiology/fieldtrip/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;em>This tutorial was created by Judy D Zhu.&lt;/em>&lt;/p>
+&lt;p>Email: &lt;a href="mailto:judyzhud@gmail.com">judyzhud@gmail.com&lt;/a>&lt;/p>
+&lt;p>Github: @JD-Zhu&lt;/p>
+&lt;p>Twitter: @JudyDZhu&lt;/p>
+&lt;/blockquote>
+&lt;hr>
+&lt;p>Please note that this container uses a compiled version of FieldTrip to run scripts (without needing a Matlab license). Code development is not currently supported within the container and needs to be carried out separatedly in Matlab.&lt;br>
+&lt;br/>&lt;/p>
+&lt;h2 id="getting-started">Getting started&lt;/h2>
+&lt;ol>
+&lt;li>Navigate to Neurodesk-&amp;gt;Electrophysiology-&amp;gt;fieldtrip-&amp;gt;fieldtrip20211114 in the menu:&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/static/fieldtrip/1_menu.png" alt="1_menu" title="1_menu">&lt;/p>
+&lt;p>Once this window is loaded, you are ready to go:&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/static/fieldtrip/2_container.PNG" alt="2_container" title="2_container">&lt;/p>
+&lt;br/>
+&lt;ol start="2">
+&lt;li>Type the following into the command window (replacing &amp;ldquo;yourscript.m&amp;rdquo; with the name of your custom script - note that you may also need to supply the full path):&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">run_fieldtrip.sh /opt/MCR/v99 yourscript.m
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>For example, here we ran a script to browser some raw data:&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/static/fieldtrip/3_running.PNG" alt="3_running" title="3_running">&lt;/p>
+&lt;p>The fieldtrip GUI is displayed automatically and functions as it normally would when running inside Matlab.&lt;/p></description></item><item><title>Tutorials: Using fmriprep with neurodesk on an HPC</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/fmriprep_cvl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/fmriprep_cvl/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;em>This tutorial was created by Kelly G. Garner.&lt;/em>&lt;/p>
+&lt;p>Email: &lt;a href="mailto:getkellygarner@gmail.com">getkellygarner@gmail.com&lt;/a>&lt;/p>
+&lt;p>Github: @kel_github&lt;/p>
+&lt;p>Twitter: @garnertheory&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>This workflow documents how to use fmriprep with neurodesk and provides some details that may help you troubleshoot some common problems I found along the way.&lt;/p>
+&lt;/blockquote>
+&lt;hr>
+&lt;h1 id="assumptions">Assumptions&lt;/h1>
+&lt;ul>
+&lt;li>&lt;input disabled="" type="checkbox"> Your data is already in BIDS format&lt;/li>
+&lt;li>&lt;input disabled="" type="checkbox"> You plan to run fmriprep using Neurodesk&lt;/li>
+&lt;li>&lt;input disabled="" type="checkbox"> You have a local copy of the freesurfer license file (freesurfer.txt)&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="steps">Steps&lt;/h1>
+&lt;h2 id="open-fmriprep">Open fmriprep&lt;/h2>
+&lt;p>From the applications go Neurodesk -&amp;gt; Functional Imaging -&amp;gt; fmriprep and select the latest version of fmriprep. This should take you to a terminal window with fmriprep loaded.&lt;/p>
+&lt;h2 id="setting-up-fmriprep-command">Setting up fmriprep command&lt;/h2>
+&lt;p>If you like, you can enter the following fmriprep command straight into the command line in the newly opened terminal. However, as with increasing options and preferences the command can get rather verbose, I instead opted to create an executable bash script that I can run straight from the command line, with minimal editing inbetween runs. If you&amp;rsquo;re not interested in this option you can skip straight to copying/adjusting the code from &lt;code>fmriprep&lt;/code> to &lt;code>-v&lt;/code> below.&lt;/p>
+&lt;ul>
+&lt;li>open a new file in your editor of choice but really you know it should be Visual Studio Code&lt;/li>
+&lt;li>save that file with your chosen name without an extension, e.g. run_fmriprep&lt;/li>
+&lt;li>paste in the following and update with your details&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#8f5902;font-style:italic">#!/bin/bash
+&lt;/span>&lt;span style="color:#8f5902;font-style:italic">&lt;/span>&lt;span style="color:#8f5902;font-style:italic">#&lt;/span>
+&lt;span style="color:#8f5902;font-style:italic"># written by A. Name - the purpose of this code is to run fmriprep with neurodesk&lt;/span>
+&lt;span style="color:#204a87">export&lt;/span> &lt;span style="color:#000">ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">=&lt;/span>&lt;span style="color:#0000cf;font-weight:bold">6&lt;/span> &lt;span style="color:#8f5902;font-style:italic"># specify the number of threads you want to use&lt;/span>
+fmriprep /path/to/your/data &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># this is the top level of your data folder&lt;/span>
+/path/to/your/data/derivatives &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># where you want fmriprep output to be saved&lt;/span>
+participant &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># this tells fmriprep to analyse at the participant level&lt;/span>
+--fs-license-file /path/to/your/freesurfer.txt &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># where the freesurfer license file is&lt;/span>
+--output-spaces T1w MNI152NLin2009cAsym fsaverage fsnative &lt;span style="color:#4e9a06">\ &lt;/span>
+--participant-label &lt;span style="color:#0000cf;font-weight:bold">01&lt;/span> &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># put what ever participant labels you want to analyse&lt;/span>
+--nprocs &lt;span style="color:#0000cf;font-weight:bold">6&lt;/span> --mem &lt;span style="color:#0000cf;font-weight:bold">10000&lt;/span> &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># fmriprep can be greedy on the hpc, make sure it is not&lt;/span>
+--skip_bids_validation &lt;span style="color:#4e9a06">\ &lt;/span>&lt;span style="color:#8f5902;font-style:italic"># its normally fine to skip this but do make sure your data are BIDS enough&lt;/span>
+-v &lt;span style="color:#8f5902;font-style:italic"># be verbal fmriprep, tell me what you are doing&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To make the file executable, navigate to this file via the command line in terminal and type&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">chmod u+x run_fmriprep &lt;span style="color:#8f5902;font-style:italic"># this tells the system to make your new file executable&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Then to run your new executable, return to your terminal window for fmriprep (that opened when you navigated to fmriprep) and type:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">./run_fmriprep
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>fmriprep should now be merrily working away on your data :)&lt;/p>
+&lt;hr>
+&lt;h2 id="some-common-pitfalls-i-have-learned-from-my-mistakes-and-sometimes-from-others">Some common pitfalls I have learned from my mistakes (and sometimes from others)&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>If fmriprep hangs it could well be that you are out of disk space. Sometimes this is because fmriprep created a work directory in your home folder which is often limited on the HPC. Make sure fmriprep knows to use a work drectory in your scratch. you can specify this in the fmriprep command by using -w /path/to/the/work/directory/you/made&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>I learned this from TomCat (@thomshaw92) - fmriprep can get confused between subjects when run in parallel. Parallelise with caution.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>If running on a HPC, make sure to set the processor and memory limits, if not your job will get killed because it hogs all the resources.&lt;/p>
+&lt;/li>
+&lt;/ol></description></item><item><title>Tutorials: FreeSurfer</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/structural_imaging/freesurfer/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/structural_imaging/freesurfer/</guid><description>
 &lt;h2 id="download-demo-data">Download demo data&lt;/h2>
 &lt;p>Open a terminal and run:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">pip install osfclient
@@ -19,28 +264,31 @@ source /opt/freesurfer-7.1.1/SetUpFreeSurfer.sh
 export SUBJECTS_DIR=/neurodesktop-storage/freesurfer-output
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Run Recon all pipeline:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">recon-all -subject test-subject -i /neurodesktop-storage/sub-01_ses-01_7T_T1w_defaced.nii.gz -all
-&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Tutorials: Analysing EEG Data with MNE</title><link>https://neurodesk.github.io/tutorials/electrophysiology/eeg_mne-python/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/electrophysiology/eeg_mne-python/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>Tutorials: Analysing EEG Data with MNE</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/electrophysiology/eeg_mne-python/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/electrophysiology/eeg_mne-python/</guid><description>
 &lt;h2 id="getting-started">Getting started&lt;/h2>
-&lt;p>Open Visual Studio Code:&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut1.png" alt="EEGtut1" title="EEGtut1">&lt;/p>
+&lt;p>To begin, navigate to Neurodesk-&amp;gt;Electrophysiology-&amp;gt;mne-&amp;gt;vscodeGUI 0.23.4 in the menu. This version of vscode has been installed in a software container together with the a conda environment containing MNE-python. Note that if you open any other version of vscode in Neurodesk, you will not be able to access the MNE conda environment.&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut0.png" alt="EEGtut0" title="EEGtut0">&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut1.png" alt="EEGtut1" title="EEGtut1">&lt;/p>
 &lt;p>Open the folder: “/home/user/Desktop/neurodesktop-storage” or a subfolder in which you would like to store this demo. In this folder, create a new file named “EEGDemo.ipynb” or something similar:&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut2.png" alt="EEGtut2" title="EEGtut2">&lt;/p>
-&lt;p>If this is your first time opening a Jupyter notebook on vscode in neurodesktop, you will see the following popup. If so, click “install” to install the vscode extensions for Jupyter.&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut3.png" alt="EEGtut3" title="EEGtut3">&lt;/p>
-&lt;h2 id="set-up-an-environment">Set up an environment&lt;/h2>
-&lt;blockquote>
-&lt;p>Coming soon! Neurodesktop will soon feature a number of built in conda environments for standard analyses of behavioural, physiological, and encephalographic data.&lt;/p>
-&lt;/blockquote>
-&lt;p>From the top menu in vscode, select Terminal-&amp;gt;New Terminal, or hit [Ctrl]+[Shift]+[`]. From this terminal, create and activate a new conda environment in which to run mne-python.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">conda create --name=mne --channel=conda-forge mne python=3 jupyter nb_conda_kernels
-conda activate mne
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>Once your new environment is activated, in the top right corner of your empty jupyter notebook, click “Select Kernel”:&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut4.png" alt="EEGtut4" title="EEGtut4">&lt;/p>
-&lt;p>Then, select the instance of Python associated with the environment you have just created (“mne”). If your new environment does not appear in the list, you may need to restart vscode:&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut5.png" alt="EEGtut5" title="EEGtut5">&lt;/p>
-&lt;p>At this point you may also be prompted to install the vscode packages for python. Once you have installed these, you’re ready to rumble!&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut2.png" alt="EEGtut2" title="EEGtut2">&lt;/p>
+&lt;p>If this is your first time opening a Jupyter notebook on vscode in neurodesktop, you may see the following popup. If so, click “install” to install the vscode extensions for Jupyter.&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut3.png" alt="EEGtut3" title="EEGtut3">&lt;/p>
+&lt;h2 id="select-mne-python-kernel">Select MNE python kernel&lt;/h2>
+&lt;p>Next, we need to direct vscode to use the python kernel associated with MNE. In the top right corner of your empty jupyter notebook, click “Select Kernel”:&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut4.png" alt="EEGtut4" title="EEGtut4">&lt;/p>
+&lt;p>Then, select mne-0.23.4 from the dropdown menu, which should look something like this:&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut5.png" alt="EEGtut5" title="EEGtut5">&lt;/p>
+&lt;h2 id="activate-the-mne-conda-environment-in-the-terminal">Activate the MNE conda environment in the terminal&lt;/h2>
+&lt;p>Next, we&amp;rsquo;ll activate the same MNE environment in a terminal. From the top menu in vscode, select Terminal-&amp;gt;New Terminal, or hit [Ctrl]+[Shift]+[`].&lt;/p>
+&lt;p>If this is your first time using vscode in this container, you may have to initialise conda by typing &lt;code>conda init bash&lt;/code> in the bash terminal. After initialising bash, you will have to close and then reopen the terminal.&lt;/p>
+&lt;p>Once you have initialised conda, you can activate the MNE environment in the terminal:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">conda activate mne-0.23.4
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>You should now see &amp;ldquo;(mne-0.23.4)&amp;rdquo; ahead of the current line in the terminal.&lt;/p>
 &lt;h2 id="download-sample-data">Download sample data&lt;/h2>
-&lt;p>In the terminal, input the following code to download some BIDS formatted sample EEG data:&lt;/p>
+&lt;p>In the terminal (in which you have activated the MNE environment), input the following code to download some BIDS formatted sample EEG data:&lt;/p>
+&lt;blockquote>
+&lt;p>Remember to update the path to the location you are storing this tutorial!&lt;/p>
+&lt;/blockquote>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">pip install osfclient
 osf -p C689U fetch Data_sample.zip /neurodesktop-storage/EEGDEMO/Data_sample.zip
 unzip Data_sample.zip
@@ -61,7 +309,7 @@ import os
 import numpy as np
 import mne
 # Load data
-sample_data_folder = &amp;#39;/home/user/Desktop/neurodesktop-storage/EEGDemo/Data_sample&amp;#39;
+sample_data_folder = &amp;#39;/home/user/neurodesktop-storage/EEGDemo/Data_sample&amp;#39;
 sample_data_raw_file = os.path.join(sample_data_folder, &amp;#39;sub-01&amp;#39;, &amp;#39;eeg&amp;#39;,
 &amp;#39;sub-01_task-FeatAttnDec_eeg.vhdr&amp;#39;)
 raw = mne.io.read_raw_brainvision(sample_data_raw_file , preload=True)
@@ -81,12 +329,13 @@ montageuse = mne.channels.make_dig_montage(ch_pos=montage, lpa=[-82.5, -19.2, -4
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Next, lets visualise the data.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">raw.plot()
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>This should open an interactive window in which you can scroll through the data. See the MNE documentation for help on how to customise this plot.&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut6.png" alt="EEGtut6" title="EEGtut6">&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut6.png" alt="EEGtut6" title="EEGtut6">&lt;/p>
 &lt;p>If, upon visual inspection, you decide to exclude one of the channels, you can specify this in raw.info[‘bads’] now. For example:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">raw.info[&amp;#39;bads&amp;#39;] = [&amp;#39;POz&amp;#39;]
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Next, we’ll extract our events. The trigger channel in this file is incorrectly scaled, so we’ll correct that before we extract our events:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># Correct trigger scaling
-trigchan = raw.pick(&amp;#39;TRIG&amp;#39;).copy()
+trigchan = raw.copy()
+trigchan = trigchan.pick(&amp;#39;TRIG&amp;#39;)
 trigchan._data = trigchan._data*1000000
 # Extract events
 events = mne.find_events(trigchan, stim_channel=&amp;#39;TRIG&amp;#39;, consecutive=True, initial_event=True, verbose=True)
@@ -94,7 +343,7 @@ print(&amp;#39;Found %s events, first five:&amp;#39; % len(events))
 print(events[:5])
 # Plot events
 mne.viz.plot_events(events, raw.info[&amp;#39;sfreq&amp;#39;], raw.first_samp)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut7.png" alt="EEGtut7" title="EEGtut7">&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut7.png" alt="EEGtut7" title="EEGtut7">&lt;/p>
 &lt;p>Now that we’ve extracted our events, we can extract our EEG channels and do some simple pre-processing:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># select
 eeg_data = raw.copy().pick_types(eeg=True, exclude=[&amp;#39;TRIG&amp;#39;])
@@ -107,7 +356,7 @@ eeg_data_interp.filter(l_freq=1, h_freq=45, h_trans_bandwidth=0.1)
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Let’s visualise our data again now that it’s cleaner:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">#plot results again, this time with some events and scaling.
 eeg_data_interp.plot(events=events, duration=10.0, scalings=dict(eeg=0.00005), color=&amp;#39;k&amp;#39;, event_color=&amp;#39;r&amp;#39;)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut8.png" alt="EEGtut8" title="EEGtut8">&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut8.png" alt="EEGtut8" title="EEGtut8">&lt;/p>
 &lt;p>That’s looking good! We can even see hints of the frequency tagging. It’s about time to epoch our data.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># Epoch to events of interest
 event_id = {&amp;#39;attend 6Hz K&amp;#39;: 23, &amp;#39;attend 7.5Hz K&amp;#39;: 27}
@@ -125,7 +374,7 @@ attend75 = epochs[&amp;#39;attend 7.5Hz K&amp;#39;].average()
 evokeds = dict(attend6=list(epochs[&amp;#39;attend 6Hz K&amp;#39;].iter_evoked()),
 attend75=list(epochs[&amp;#39;attend 7.5Hz K&amp;#39;].iter_evoked()))
 mne.viz.plot_compare_evokeds(evokeds, combine=&amp;#39;mean&amp;#39;)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut9.png" alt="EEGtut9" title="EEGtut9">&lt;/p>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut9.png" alt="EEGtut9" title="EEGtut9">&lt;/p>
 &lt;p>In this plot, we can see that the data are frequency tagged. While these data were collected, the participant was performing an attention task in which two visual stimuli were flickering at 6 Hz and 7.5 Hz respectively. On each trial the participant was cued to monitor one of these two stimuli for brief bursts of motion. From previous research, we expect that the steady-state visual evoked potential (SSVEP) should be larger at the attended frequency than the unattended frequency. Lets check if this is true.&lt;/p>
 &lt;p>We&amp;rsquo;ll begin by exporting our epoched EEG data to a numpy array&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># Preallocate
@@ -149,8 +398,138 @@ ax.set_xlim(4, 17)
 ax.set_ylim(0, 1e-6)
 ax.set_title(&amp;#39;Frequency Spectrum&amp;#39;)
 ax.legend()
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut10.PNG" alt="EEGtut10" title="EEGtut10">&lt;/p>
-&lt;p>This plot shows that the SSVEPs were indeed modulated by attention in the direction we would expect! Congratulations! You’ve run your first analysis of EEG data in neurodesktop.&lt;/p></description></item><item><title>Tutorials: Quantitative Susceptibility Mapping</title><link>https://neurodesk.github.io/tutorials/phase_processing/qsm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/phase_processing/qsm/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut10.PNG" alt="EEGtut10" title="EEGtut10">&lt;/p>
+&lt;p>This plot shows that the SSVEPs were indeed modulated by attention in the direction we would expect! Congratulations! You’ve run your first analysis of EEG data in neurodesktop.&lt;/p></description></item><item><title>Tutorials: Using mriqc with neurodesk on HPC</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/mriqc_cvl/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/mriqc_cvl/</guid><description>
+&lt;blockquote>
+&lt;p>&lt;em>This tutorial was created by Kelly G. Garner.&lt;/em>&lt;/p>
+&lt;p>Email: &lt;a href="mailto:getkellygarner@gmailc.om">getkellygarner@gmail.com&lt;/a>&lt;/p>
+&lt;p>Github: &lt;a href="https://github.com/kel-github">@kel_github&lt;/a>&lt;/p>
+&lt;p>Twitter: &lt;a href="https://twitter.com/garner_theory">@garnertheory&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;blockquote>
+&lt;p>This workflow documents how to use mriqc with neurodesk and provides some details that may help you troubleshoot some common problems I found along the way.&lt;/p>
+&lt;/blockquote>
+&lt;hr>
+&lt;h1 id="assumptions">Assumptions&lt;/h1>
+&lt;ul>
+&lt;li>&lt;input disabled="" type="checkbox"> Your data is already in BIDS format&lt;/li>
+&lt;li>&lt;input disabled="" type="checkbox"> You plan to run mriqc using Neurodesk&lt;/li>
+&lt;/ul>
+&lt;hr>
+&lt;h1 id="steps">Steps&lt;/h1>
+&lt;h2 id="open-mriqc">Open mriqc&lt;/h2>
+&lt;p>From the applications go Neurodesk -&amp;gt; Functional Imaging -&amp;gt; mriqc and select the latest version of mriqc. This should take you to a terminal window with mriqc loaded. &lt;p>&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/mriqc_cvl/mriqc_terminal.png" alt="mriqc_terminal" title="mriqc_terminal"> &lt;!-- ![filename without extension](/subfolder_name/filename.png '[filename without extension') -->&lt;/p>
+&lt;h2 id="setting-up-mriqc-command">Setting up mriqc command&lt;/h2>
+&lt;p>If you like, you can enter the following mriqc commands straight into the command line in the newly opened terminal. However, as with increasing options and preferences the command can get rather verbose, so I instead opted to create executable bash scripts that I can run straight from the command line, with minimal editing inbetween runs. I made one for running mriqc at the participant level, and one for running at the group level (for the group report, once all the participants are done). If you&amp;rsquo;re not interested in this option you can skip straight to copying/adjusting the code from &lt;code>mriqc&lt;/code> to &lt;code>-v&lt;/code> below.&lt;/p>
+&lt;ul>
+&lt;li>open a new file in your editor of choice (e.g. Visual Studio Code)&lt;/li>
+&lt;li>save that file with your chosen name without an extension, e.g. run_mriqc_participant or run_mriqc_group&lt;/li>
+&lt;li>paste in the following and update with your details&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#a40000">#&lt;/span>&lt;span style="color:#000;font-weight:bold">!&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">bin&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">bash&lt;/span>
+&lt;span style="color:#a40000">#&lt;/span>
+&lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">written&lt;/span> &lt;span style="color:#000">by&lt;/span> &lt;span style="color:#000">A&lt;/span>&lt;span style="color:#000;font-weight:bold">.&lt;/span> &lt;span style="color:#000">Name&lt;/span> &lt;span style="color:#ce5c00;font-weight:bold">-&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">purpose&lt;/span> &lt;span style="color:#000">of&lt;/span> &lt;span style="color:#000">this&lt;/span> &lt;span style="color:#000">code&lt;/span> &lt;span style="color:#000">is&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">run&lt;/span> &lt;span style="color:#000">mriqc&lt;/span> &lt;span style="color:#000">with&lt;/span> &lt;span style="color:#000">neurodesk&lt;/span>
+&lt;span style="color:#000">export&lt;/span> &lt;span style="color:#000">ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS&lt;/span>&lt;span style="color:#000;font-weight:bold">=&lt;/span>&lt;span style="color:#0000cf;font-weight:bold">6&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">specify&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">number&lt;/span> &lt;span style="color:#000">of&lt;/span> &lt;span style="color:#000">threads&lt;/span> &lt;span style="color:#000">you&lt;/span> &lt;span style="color:#000">want&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">use&lt;/span>
+&lt;span style="color:#000">mriqc&lt;/span> &lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">path&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">to&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">your&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">data&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">this&lt;/span> &lt;span style="color:#000">is&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">top&lt;/span> &lt;span style="color:#000">level&lt;/span> &lt;span style="color:#000">of&lt;/span> &lt;span style="color:#000">your&lt;/span> &lt;span style="color:#000">data&lt;/span> &lt;span style="color:#000">folder&lt;/span>
+&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">path&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">to&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">your&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">data&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">derivatives&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">where&lt;/span> &lt;span style="color:#000">you&lt;/span> &lt;span style="color:#000">want&lt;/span> &lt;span style="color:#000">mriqc&lt;/span> &lt;span style="color:#000">output&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">be&lt;/span> &lt;span style="color:#000">saved&lt;/span>
+&lt;span style="color:#000">participant&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">this&lt;/span> &lt;span style="color:#000">tells&lt;/span> &lt;span style="color:#000">mriqc&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">analyse&lt;/span> &lt;span style="color:#000">at&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">participant&lt;/span> &lt;span style="color:#000">level&lt;/span>
+&lt;span style="color:#ce5c00;font-weight:bold">--&lt;/span>&lt;span style="color:#000">participant&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">-&lt;/span>&lt;span style="color:#000">label&lt;/span> &lt;span style="color:#0000cf;font-weight:bold">01&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">put&lt;/span> &lt;span style="color:#000">what&lt;/span> &lt;span style="color:#000">ever&lt;/span> &lt;span style="color:#000">participant&lt;/span> &lt;span style="color:#000">labels&lt;/span> &lt;span style="color:#000">you&lt;/span> &lt;span style="color:#000">want&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">analyse&lt;/span>
+&lt;span style="color:#ce5c00;font-weight:bold">--&lt;/span>&lt;span style="color:#000">work&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">-&lt;/span>&lt;span style="color:#000">dir&lt;/span> &lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">path&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">to&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">work&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">directory&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span>&lt;span style="color:#000">useful&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">specify&lt;/span> &lt;span style="color:#000">so&lt;/span> &lt;span style="color:#000">your&lt;/span> &lt;span style="color:#000">home&lt;/span> &lt;span style="color:#000">directory&lt;/span> &lt;span style="color:#000">definitely&lt;/span> &lt;span style="color:#000">doesnt&lt;/span> &lt;span style="color:#000">get&lt;/span> &lt;span style="color:#000">clogged&lt;/span>
+&lt;span style="color:#ce5c00;font-weight:bold">--&lt;/span>&lt;span style="color:#000">nprocs&lt;/span> &lt;span style="color:#0000cf;font-weight:bold">6&lt;/span> &lt;span style="color:#ce5c00;font-weight:bold">--&lt;/span>&lt;span style="color:#000">mem_gb&lt;/span> &lt;span style="color:#0000cf;font-weight:bold">10000&lt;/span> &lt;span style="color:#a40000">\&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">mriqc&lt;/span> &lt;span style="color:#000">can&lt;/span> &lt;span style="color:#000">be&lt;/span> &lt;span style="color:#000">greedy&lt;/span> &lt;span style="color:#000">on&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">hpc&lt;/span>&lt;span style="color:#000;font-weight:bold">,&lt;/span> &lt;span style="color:#000">make&lt;/span> &lt;span style="color:#000">sure&lt;/span> &lt;span style="color:#000">it&lt;/span> &lt;span style="color:#000">is&lt;/span> &lt;span style="color:#000">not&lt;/span>
+&lt;span style="color:#ce5c00;font-weight:bold">-&lt;/span>&lt;span style="color:#000">v&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">be&lt;/span> &lt;span style="color:#000">verbal&lt;/span> &lt;span style="color:#000">mriqc&lt;/span>&lt;span style="color:#000;font-weight:bold">,&lt;/span> &lt;span style="color:#000">tell&lt;/span> &lt;span style="color:#000">me&lt;/span> &lt;span style="color:#000">what&lt;/span> &lt;span style="color:#000">you&lt;/span> &lt;span style="color:#000">are&lt;/span> &lt;span style="color:#000">doing&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>OR: if you have run all the participants and you just want the group level report, use these mriqc commands instead:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">mriqc /path/to/your/data \ # this is the top level of your data folder
+/path/to/your/data/derivatives \ # where you want mriqc output to be saved. As you are running the group level analysis this folder should be prepopulated with the results of the participant level analysis
+group \ # this tells mriqc to agive you the group report
+-w /path/to/work/directory \ #useful to specify so your home directory definitely doesnt get clogged
+--nprocs 6 --mem_gb 10000 \ # mriqc can be greedy on the hpc, make sure it is not
+-v # be verbal mriqc, tell me what you are doing
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To make either of yours files executable, navigate via the terminal to the same folder in which this file is saved. If you list the files in the folder by using the command &lt;code>ls&lt;/code> you should see your file with the name printed in white.&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/mriqc_cvl/pre_exec.png" alt="pre_exec" title="pre_exec"> &lt;!-- ![filename without extension](/subfolder_name/filename.png '[filename without extension') -->&lt;/p>
+&lt;p>Now type the following command:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#000">chmod&lt;/span> &lt;span style="color:#000">u&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">+&lt;/span>&lt;span style="color:#000">x&lt;/span> &lt;span style="color:#000">run_mriqc_participant&lt;/span> &lt;span style="color:#a40000">#&lt;/span> &lt;span style="color:#000">this&lt;/span> &lt;span style="color:#000">tells&lt;/span> &lt;span style="color:#000">the&lt;/span> &lt;span style="color:#000">system&lt;/span> &lt;span style="color:#000">to&lt;/span> &lt;span style="color:#000">make&lt;/span> &lt;span style="color:#000">your&lt;/span> &lt;span style="color:#000">new&lt;/span> &lt;span style="color:#000">file&lt;/span> &lt;span style="color:#000">executable&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>To know this worked, list the files again. If you have successfully made your file executable then it will be listed in green.&lt;/p>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/mriqc_cvl/mriqc_post_exec.png" alt="mriqc_post_exec" title="mriqc_post_exec"> &lt;!-- ![filename without extension](/subfolder_name/filename.png '[filename without extension') -->&lt;/p>
+&lt;p>Then to run your new executable, return to your terminal window for mriqc (that opened when you navigated to mriqc), navigate to the directory where your executable file is stored and type:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-go" data-lang="go">&lt;span style="color:#000;font-weight:bold">.&lt;/span>&lt;span style="color:#ce5c00;font-weight:bold">/&lt;/span>&lt;span style="color:#000">name_of_your_mriqc_file&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>mriqc should now be merrily working away on your data :)&lt;/p>
+&lt;hr>
+&lt;h2 id="some-common-pitfalls-i-have-learned-from-my-mistakes-and-sometimes-from-others">Some common pitfalls I have learned from my mistakes (and sometimes from others)&lt;/h2>
+&lt;ol>
+&lt;li>If running on a HPC, make sure to set the processor and memory limits, if not your job will get killed because mriqc hogs all the resources.&lt;/li>
+&lt;/ol></description></item><item><title>Tutorials: PhysIO</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/physio/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/functional_imaging/physio/</guid><description>
+&lt;h2 id="purpose">Purpose&lt;/h2>
+&lt;p>The general purpose of the PhysIO toolbox is model-based physiological noise correction of fMRI data using peripheral measures of respiration and cardiac pulsation (respiratory bellows, ECG, pulse oximeter/plethysmograph).&lt;/p>
+&lt;p>It incorporates noise models of&lt;/p>
+&lt;ul>
+&lt;li>cardiac/respiratory phase (RETROICOR, Glover et al. 2000), as well as&lt;/li>
+&lt;li>heart rate variability and respiratory volume per time (cardiac response function, Chang et. al, 2009, respiratory response function, Birn et al. 2006),&lt;/li>
+&lt;li>and extended motion models (e.g., censoring/scrubbing)&lt;/li>
+&lt;/ul>
+&lt;p>While the toolbox is particularly well integrated with SPM via the Batch Editor GUI, its output text files can be incorporated into any major neuroimaging analysis package for nuisance regression, e.g., within a GLM.&lt;/p>
+&lt;p>Core design goals for the toolbox were: flexibility, robustness, and quality assurance to enable physiological noise correction for large-scale and multi-center studies.&lt;/p>
+&lt;p>Some highlights:&lt;/p>
+&lt;ul>
+&lt;li>Robust automatic preprocessing of peripheral recordings via iterative peak detection, validated in noisy data and patients, and extended processing of respiratory data (Harrison et al., 2021)&lt;/li>
+&lt;li>Flexible support of peripheral data formats (BIDS, Siemens, Philips, GE, BioPac, HCP, &amp;hellip;) and noise models (RETROICOR, RVHRCOR).&lt;/li>
+&lt;li>Fully automated noise correction and performance assessment for group studies.&lt;/li>
+&lt;li>Integration in fMRI pre-processing pipelines as SPM Toolbox (Batch Editor GUI).&lt;/li>
+&lt;/ul>
+&lt;p>The accompanying technical paper about the toolbox concept and methodology can be found at: &lt;a href="https://doi.org/10.1016/j.jneumeth.2016.10.019">https://doi.org/10.1016/j.jneumeth.2016.10.019&lt;/a>&lt;/p>
+&lt;p>See more info about PhysIO (incl. relevant papers to cite and FAQ) in the online &lt;a href="https://github.com/translationalneuromodeling/tapas/tree/master/PhysIO#readme">README&lt;/a> on GitHub. PhysIO is part of the TAPAS Software Collection GitHub, and its Matlab version is exclusively hosted there.&lt;/p>
+&lt;p>NeuroDesk offers the possibility of running PhysIO without installing Matlab or requiring a Matlab license. The functionality should be equivalent, though debugging and extending the toolbox, as well as unreleased development features, will only be available in the Matlab version of PhysIO.&lt;/p>
+&lt;h2 id="download-example-data">Download Example Data&lt;/h2>
+&lt;p>The example data should already be present in NeuroDesk in the following folder &lt;code>/opt/spm12&lt;/code>&lt;/p>
+&lt;p>If you cannot find the example data there:&lt;/p>
+&lt;ol>
+&lt;li>Download the latest version from the &lt;a href="https://github.com/translationalneuromodeling/tapas/blob/master/misc/log_tapas.txt">location mentioned in the TAPAS distribution&lt;/a>
+&lt;ul>
+&lt;li>e.g., &lt;a href="https://www.tapas.tnu-zurich.com/examples_v5.0.0.zip">https://www.tapas.tnu-zurich.com/examples_v5.0.0.zip&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Follow the instructions for copying your own data in the next section&lt;/li>
+&lt;/ol>
+&lt;h2 id="copy-your-own-data">Copy your own data&lt;/h2>
+&lt;ul>
+&lt;li>On Windows, the folder &lt;code>C:\neurodesktop-storage&lt;/code> should have been automatically created when starting NeuroDesk&lt;/li>
+&lt;li>This is your direct link to the NeuroDesk environment, and anything you put in there should end up within the NeuroDesk desktop in &lt;code>/neurodesktop-storage/&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;h2 id="example-running-physio-in-the-gui">Example: Running PhysIO in the GUI&lt;/h2>
+&lt;ol>
+&lt;li>Open the PhysIO GUI (Neurodesk -&amp;gt; Functional Imaging -&amp;gt; physio -&amp;gt; physioGUI r7771, see screenshot:&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/FunctionalImaging_Tutorial/physio_screenshot1.jpg" alt="PhysIO GUI in NeuroDesk" title="physio_screenshot">&lt;/p>
+&lt;ol start="2">
+&lt;li>SPM should automatically open up (might take a while). Select &amp;lsquo;fMRI&amp;rsquo; from the modality selection screen.&lt;/li>
+&lt;li>Press the &amp;ldquo;Batch Editor&amp;rdquo; button (see screenshot with open Batch Editor, red highlights)&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/FunctionalImaging_Tutorial/physio_screenshot2.jpg" alt="NeuroDesk with SPM Batch Editor PhysIO" title="physio_screenshot2">&lt;/p>
+&lt;pre>&lt;code>- NB: If you later want to create a new PhysIO batch with all parameters, from scratch or explore the options, select from the Batch Editor Menu top row, SPM -&amp;gt; Tools -&amp;gt; TAPAS PhysIO Toolbox (see screenshot, read highlights)
+&lt;/code>&lt;/pre>
+&lt;ol start="4">
+&lt;li>For now, load an existing example (or previously created SPM Batch File) as follows: It is most convenient to change the working directory of SPM to the location of the physiological logfiles
+&lt;ul>
+&lt;li>In the Batch Editor GUI, lowest row, choose &amp;lsquo;CD&amp;rsquo; from the &amp;lsquo;Utils..&amp;rsquo; dropdown menu&lt;/li>
+&lt;li>Navigate to any of the example folders, e.g., &lt;code>/opt/spm12/examples/Philips/ECG3T/&lt;/code> and select it&lt;/li>
+&lt;li>NB: you can skip this part, if you later manually update all input files in the Batch Editor window (resp/cardiac/scan timing and realignment parameter file further down)&lt;/li>
+&lt;li>Any other example should also work the same way, just CD to its folder before the next step&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Select File -&amp;gt; Load Batch from the top row menu of the Batch Editor window
+&lt;ul>
+&lt;li>make sure you select the matlab batch file &lt;code>*_spm_job.&amp;lt;m|mat&amp;gt;&lt;/code>, (e.g., &lt;code>philips_ecg3t_spm_job.m&lt;/code> and &lt;code>philips_ecg3t_spm_job.mat&lt;/code> are identical, either is fine), but not the script.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Press The green &amp;ldquo;Play&amp;rdquo; button in the top icon menu row of the Batch Editor Window&lt;/li>
+&lt;li>Several output figures should appear, with the last being a grayscale plot of the nuisance regressor design matrix&lt;/li>
+&lt;/ol>
+&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/FunctionalImaging_Tutorial/physio_screenshot3.jpg" alt="Output Nuisance Regressor Matrix PhysIO" title="physio_screenshot3">&lt;/p>
+&lt;ol start="8">
+&lt;li>Congratulations, your first successful physiological noise model has been created! If you don&amp;rsquo;t see the mentioned figure, chances are certain input files were not found (e.g., wrong file location specified). You can always check the text output in the &amp;ldquo;bash&amp;rdquo; window associated with the SPM window for any error messages.&lt;/li>
+&lt;/ol>
+&lt;h2 id="further-info-on-physio">Further Info on PhysIO&lt;/h2>
+&lt;p>Please check out the &lt;a href="https://github.com/translationalneuromodeling/tapas/tree/master/PhysIO#readme">README&lt;/a> and &lt;a href="https://gitlab.ethz.ch/physio/physio-doc/-/wikis/FAQ">FAQ&lt;/a>&lt;/p></description></item><item><title>Tutorials: Quantitative Susceptibility Mapping</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/qsm/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/qsm/</guid><description>
 &lt;h2 id="quantitative-susceptibility-mapping-in-qsmxt">Quantitative Susceptibility Mapping in QSMxT&lt;/h2>
 &lt;p>Neurodesk includes QSMxT, a complete and end-to-end QSM processing and analysis framework that excels at automatically reconstructing and processing QSM for large groups of participants.&lt;/p>
 &lt;p>QSMxT provides pipelines implemented in Python that:&lt;/p>
@@ -192,7 +571,7 @@ python3 /opt/QSMxT/run_1_dicomToBids.py 00_dicom 01_bids
 &lt;li>Run QSM pipeline:
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">python3 /opt/QSMxT/run_2_qsm.py 01_bids 02_qsm_output
 &lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;/ol></description></item><item><title>Tutorials: SWI</title><link>https://neurodesk.github.io/tutorials/phase_processing/swi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/phase_processing/swi/</guid><description>
+&lt;/ol></description></item><item><title>Tutorials: SWI</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/swi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/swi/</guid><description>
 &lt;h2 id="download-demo-data">Download demo data&lt;/h2>
 &lt;p>Open a terminal and run:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">pip install osfclient
@@ -220,7 +599,7 @@ savenii(mip, &amp;#34;/neurodesktop-storage/swi-demo/mip.nii&amp;#34;; header=ma
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>hit SHIFT-Z-Z and run:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">julia clearswi.jl
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Open ITK snap from the Visualization Application&amp;rsquo;s menu and inspect the results (the outputs are in swi-demo/swi.nii and mip.nii)
-&lt;img src="https://user-images.githubusercontent.com/4021595/137708852-6b7dd2c7-3e6f-42fd-88e6-06afe87a72a9.png" alt="image">&lt;/p></description></item><item><title>Tutorials: Unwrapping</title><link>https://neurodesk.github.io/tutorials/phase_processing/unwrapping/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/phase_processing/unwrapping/</guid><description>
+&lt;img src="https://user-images.githubusercontent.com/4021595/137708852-6b7dd2c7-3e6f-42fd-88e6-06afe87a72a9.png" alt="image">&lt;/p></description></item><item><title>Tutorials: Unwrapping</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/unwrapping/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/phase_processing/unwrapping/</guid><description>
 &lt;h2 id="download-demo-data">Download demo data&lt;/h2>
 &lt;p>Open a terminal and run:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">pip install osfclient
@@ -235,7 +614,7 @@ gunzip /neurodesktop-storage/romeo-demo/phase.nii.gz
 &lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="using-romeo-for-phase-unwrapping">Using ROMEO for phase unwrapping&lt;/h3>
 &lt;p>Open the ROMEO tool from the application menu and run:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">romeo -p /neurodesktop-storage/romeo-demo/phase.nii -m /neurodesktop-storage/romeo-demo/mag.nii -k nomask -o /neurodesktop-storage/romeo-demo/
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://neurodesk.github.io/MRIPhase_Tutorial/romeo.PNG" alt="Romeo" title="Romeo">&lt;/p></description></item><item><title>Tutorials: Template for workflow creation</title><link>https://neurodesk.github.io/tutorials/documentation/workflowtemplate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://neurodesk.github.io/tutorials/documentation/workflowtemplate/</guid><description>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/MRIPhase_Tutorial/romeo.PNG" alt="Romeo" title="Romeo">&lt;/p></description></item><item><title>Tutorials: Template for workflow creation</title><link>https://JD-Zhu/neurodesk.github.io/tutorials/documentation/workflowtemplate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://JD-Zhu/neurodesk.github.io/tutorials/documentation/workflowtemplate/</guid><description>
 &lt;!--
 Begin setting up your tutorial by filling in the details in the description above. This controls how your tutorial is named and displayed in the Neurodesk documentation. The details are as follows:
 title: A title for your workflow
@@ -252,15 +631,44 @@ Once you've filled out those details, you can delete this comment block.
 &lt;p>Twitter: @Nameshandle&lt;/p>
 &lt;/blockquote>
 &lt;!-- Fill in your personal details above so that we can credit the tutorial to you. Feel free to add any additional contact details i.e. website, or remove those that are irrelevant -->
-&lt;p>Welcome to the workflow template, which you can use to contribute your own neurodesk workflow to our documentation. We aim to collect a wide variety of workflows representing the spectrum of tools available under the neurodesk architechture and the diversity in how researchers might apply them. Please add plently of descriptive detail and make sure that all steps of the workflow work before submitting the tutorial.&lt;/p>
-&lt;p>You can embelish your text in this tutorial using markdown conventions; text can be &lt;strong>bold&lt;/strong>, &lt;em>italic&lt;/em>, or &lt;del>strikethrough&lt;/del>. You can also add &lt;a href="https://neurodesk.github.io/">Links&lt;/a>.&lt;/p>
+&lt;p>Welcome to the workflow template, which you can use to contribute your own neurodesk workflow to our documentation. We aim to collect a wide variety of workflows representing the spectrum of tools available under the neurodesk architechture and the diversity in how researchers might apply them. Please add plenty of descriptive detail and make sure that all steps of the workflow work before submitting the tutorial.&lt;/p>
+&lt;h2 id="how-to-contribute-a-new-workflow">How to contribute a new workflow&lt;/h2>
+&lt;p>Begin by creating a copy of our documentation that you can edit:&lt;/p>
+&lt;ol>
+&lt;li>Visit the github repository for the Neurodesk documentation (&lt;a href="https://github.com/NeuroDesk/neurodesk.github.io)">https://github.com/NeuroDesk/neurodesk.github.io)&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the repository.&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>&lt;em>You should now have your own copy of the documentation, which you can alter without affecting our official documentation. You should see a panel stating &amp;ldquo;This branch is up to date with Neurodesk:hugo-docsy.&amp;rdquo; If someone else makes a change to the official documentation, the statement will change to reflect this. You can bring your repository up to date by clicking &amp;ldquo;Fetch upstream&amp;rdquo;.&lt;/em>&lt;/li>
+&lt;/ul>
+&lt;p>Next, create your workflow:&lt;/p>
+&lt;ol>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository">Clone&lt;/a> your forked version of our documentation to a location of your choice on your computer.&lt;/li>
+&lt;li>In this new folder, navigate to &amp;ldquo;neurodesk.github.io/content/en/tutorials&amp;rdquo; and then navigate to the subfolder you believe your workflow belongs in (e.g. &amp;ldquo;/functional_imaging&amp;rdquo;).&lt;/li>
+&lt;li>Create a new, appropriately named markdown file to house your workflow. (e.g. &amp;ldquo;/physio.md&amp;rdquo;)&lt;/li>
+&lt;li>Open this file in the editor of your choice (we recommend &lt;a href="https://code.visualstudio.com/">vscode&lt;/a>) and populate it with your workflow! Please use this template as a style guide, it can be located at &amp;ldquo;neurodesk.github.io\content\en\tutorials\documentation\workflowtemplate.md&amp;rdquo;. You&amp;rsquo;re also welcome to have a look at other the workflows already documented on our website for inspiration.&lt;/li>
+&lt;/ol>
+&lt;p>Finally, contribute your new workflow to the official documentation!:&lt;/p>
+&lt;ol>
+&lt;li>Once you are happy with your workflow, make sure you &lt;a href="https://github.com/git-guides/git-commit">commit&lt;/a> all your changes and &lt;a href="https://github.com/git-guides/git-push">push&lt;/a> these local commits to github.&lt;/li>
+&lt;li>Navigate to your forked version of the repository on github.&lt;/li>
+&lt;li>Before you proceed, make sure you are up to date with our upstream documentation, you may need to &lt;a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork">fetch upstream changes&lt;/a>.&lt;/li>
+&lt;li>Now you can preview the changes before contributing them upstream. For this click on the &amp;ldquo;Actions&amp;rdquo; tab and enable the Actions (&amp;ldquo;I understand my workflows&amp;hellip;&amp;quot;). The first build will fail (due to a bug with the Github token), but the second build will work.&lt;/li>
+&lt;li>Then you need to open the settings of the repository and check that Pages points to gh-pages and when clicking on the link the site should be there.&lt;/li>
+&lt;li>To contribute your changes, click &amp;ldquo;Contribute&amp;rdquo;, and then &lt;a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests">&amp;ldquo;Open pull request&amp;rdquo;&lt;/a>.&lt;/li>
+&lt;li>Give your pull request a title (e.g. &amp;ldquo;Document PhysIO workflow&amp;rdquo;), leave a comment briefly describing what you have done, and then create the pull request.&lt;/li>
+&lt;li>Someone from the Neurodesk team will review and accept your workflow and it will appear on our website soon!.&lt;/li>
+&lt;/ol>
+&lt;p>Thanks so much for taking the time to contribute your workflow to the Neurodesk community! If you have any feedback on the process, please let us know on &lt;a href="https://github.com/NeuroDesk/neurodesk.github.io/discussions">github discussions&lt;/a>.&lt;/p>
+&lt;h2 id="formatting-guidelines">Formatting guidelines&lt;/h2>
+&lt;p>You can embelish your text in this tutorial using markdown conventions; text can be &lt;strong>bold&lt;/strong>, &lt;em>italic&lt;/em>, or &lt;del>strikethrough&lt;/del>. You can also add &lt;a href="https://neurodesk.github.io/">Links&lt;/a>, and you can organise your tutorial with headers, starting at level 2 (the page title is a level 1 header):&lt;/p>
 &lt;h2 id="level-2-heading">Level 2 heading&lt;/h2>
-&lt;p>You can organise your tutorial with headers, starting at level 2 (the page title is a level 1 header). You can also include progressively smaller subheadings:&lt;/p>
+&lt;p>You can also include progressively smaller subheadings:&lt;/p>
 &lt;h3 id="level-3-heading">Level 3 heading&lt;/h3>
 &lt;p>Some more detailed information.&lt;/p>
 &lt;h4 id="level-4-heading">Level 4 heading&lt;/h4>
 &lt;p>Even more detailed information.&lt;/p>
-&lt;h2 id="code-blocks">Code blocks&lt;/h2>
+&lt;h3 id="code-blocks">Code blocks&lt;/h3>
 &lt;p>You can add codeblocks to your tutorial as follows:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback"># Some example code
 import numpy as np
@@ -283,10 +691,11 @@ print(a+b)
 [4 6]&lt;/code>
 &lt;/pre>
 &lt;p>You can also add code snippets, e.g. &lt;code>var foo = &amp;quot;bar&amp;quot;;&lt;/code>, which will be shown inline.&lt;/p>
-&lt;h2 id="images">Images&lt;/h2>
+&lt;h3 id="images">Images&lt;/h3>
 &lt;p>To add screenshots to your tutorial, create a subfolder in &lt;code>neurodesk.github.io/static&lt;/code> with the same link name as your tutorial. Add your screenshot to this folder, keeping in mind that you may want to adjust your screenshot to a reasonable size before uploading. You can then embed these images in your tutorial using the following convention:&lt;/p>
-&lt;p>&lt;img src="https://neurodesk.github.io/EEG_Tutorial/EEGtut1.png" alt="EEGtut1" title="EEGtut1"> &lt;!-- ![filename without extension](/subfolder_name/filename.png '[filename without extension') -->&lt;/p>
-&lt;h2 id="alets-and-warnings">Alets and warnings&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-fallback" data-lang="fallback">![EEGtut1](/EEG_Tutorial/EEGtut1.png &amp;#39;EEGtut1&amp;#39;) &amp;lt;!-- ![filename without extension](/subfolder_name/filename.png &amp;#39;[filename without extension&amp;#39;) --&amp;gt;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="https://JD-Zhu/neurodesk.github.io/EEG_Tutorial/EEGtut1.png" alt="EEGtut1" title="EEGtut1"> &lt;!-- ![filename without extension](/subfolder_name/filename.png '[filename without extension') -->&lt;/p>
+&lt;h3 id="alerts-and-warnings">Alerts and warnings&lt;/h3>
 &lt;p>You can grab reader&amp;rsquo;s attention to particularly important information with quoteblocks, alerts and warnings:&lt;/p>
 &lt;blockquote>
 &lt;p>This is a quoteblock&lt;/p>
@@ -311,12 +720,12 @@ This is a warning with a title.
 &lt;hr>
 &lt;p>There&amp;rsquo;s a horizontal rule above and below this.&lt;/p>
 &lt;hr>
-&lt;p>Of add page information:
+&lt;p>Or add page information:
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This is a placeholder. Replace it with your own content.&lt;/p>
 &lt;/div>
 &lt;/p>
-&lt;h2 id="tables">Tables&lt;/h2>
+&lt;h3 id="tables">Tables&lt;/h3>
 &lt;p>You may want to order information in a table as follows:&lt;/p>
 &lt;table>
 &lt;thead>
@@ -344,7 +753,7 @@ This is a warning with a title.
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
-&lt;h2 id="lists">Lists&lt;/h2>
+&lt;h3 id="lists">Lists&lt;/h3>
 &lt;p>You may want to organise information in a list as follows:&lt;/p>
 &lt;p>Here is an unordered list:&lt;/p>
 &lt;ul>
@@ -390,6 +799,4 @@ This is a warning with a title.
 &lt;li>.kdf&lt;/li>
 &lt;/ul>
 &lt;/li>
-&lt;/ul>
-&lt;h2 id="thanks">Thanks&lt;/h2>
-&lt;p>Thanks so much for taking the time to contribute your workflow to the Neurodesk community! If you have any feedback on the process, please let us know on &lt;a href="https://github.com/NeuroDesk/neurodesk.github.io/discussions">github discussions&lt;/a>.&lt;/p></description></item></channel></rss>
+&lt;/ul></description></item></channel></rss>
